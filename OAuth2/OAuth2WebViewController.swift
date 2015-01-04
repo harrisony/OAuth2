@@ -38,9 +38,9 @@ extension OAuth2
 		:param: params     Optional additional URL parameters
 		:returns: OAuth2WebViewController, embedded in a UINavigationController being presented automatically
 	*/
-	public func authorizeEmbeddedFrom(controller: UIViewController, params: [String: String]?) -> OAuth2WebViewController {
+	public func authorizeEmbeddedFrom(controller: UIViewController, params: [String: String]?, title: String = "") -> OAuth2WebViewController {
 		let url = authorizeURL()
-		return presentAuthorizeViewFor(url, intercept: redirect!, from: controller)
+		return presentAuthorizeViewFor(url, intercept: redirect!, from: controller, title: title)
 	}
 	
 	/**
@@ -61,9 +61,10 @@ extension OAuth2
 	public func authorizeEmbeddedFrom(controller: UIViewController,
 	                                    redirect: String,
 	                                       scope: String,
-	                                      params: [String: String]?) -> OAuth2WebViewController {
+	                                      params: [String: String]?,
+                                           title: String = "") -> OAuth2WebViewController {
 		let url = authorizeURLWithRedirect(redirect, scope: scope, params: params)
-		return presentAuthorizeViewFor(url, intercept: redirect, from: controller)
+		return presentAuthorizeViewFor(url, intercept: redirect, from: controller, title: title)
 	}
 	
 	/**
@@ -71,7 +72,7 @@ extension OAuth2
 		
 		:returns: OAuth2WebViewController, embedded in a UINavigationController being presented automatically
 	 */
-	func presentAuthorizeViewFor(url: NSURL, intercept: String, from: UIViewController) -> OAuth2WebViewController {
+	func presentAuthorizeViewFor(url: NSURL, intercept: String, from: UIViewController, title: String) -> OAuth2WebViewController {
 		let web = OAuth2WebViewController()
 		web.startURL = url
 		web.interceptURLString = intercept
@@ -84,6 +85,7 @@ extension OAuth2
 				self.didFail(nil)
 			}
 		}
+		web.viewTitle = title
 		
 		let navi = UINavigationController(rootViewController: web)
 		from.presentViewController(navi, animated: true, completion: nil)
@@ -136,6 +138,8 @@ public class OAuth2WebViewController: UIViewController, UIWebViewDelegate
 	var webView: UIWebView!
 	var loadingView: UIView?
 	
+	var viewTitle: String?
+
 	override init() {
 		super.init(nibName: nil, bundle: nil)
 	}
@@ -148,7 +152,7 @@ public class OAuth2WebViewController: UIViewController, UIWebViewDelegate
 	// MARK: - View Handling
 	
 	override public func loadView() {
-		title = "SMART"
+		title = viewTitle
 		edgesForExtendedLayout = .All
 		extendedLayoutIncludesOpaqueBars = true
 		automaticallyAdjustsScrollViewInsets = true
